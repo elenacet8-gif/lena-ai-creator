@@ -82,16 +82,25 @@
 </main>
 <footer class="wrap">© LENA AI CREATOR · MUSIC • VISUALS • EMOTIONS</footer>
 <script>
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw7QhMBwJ9OvWx_YtF3fqis9x7EFFRDdo3nuFwVwnr1hdByTpC4Vv8HOg1Lk6Z15wEnLQ/exec';
 const form=document.getElementById('leadForm'),statusBox=document.getElementById('status');
 form.addEventListener('submit',async e=>{
-  e.preventDefault();statusBox.textContent='Отправляем заявку…';
+  e.preventDefault();
+  statusBox.textContent='Отправляем заявку…';
   const data=Object.fromEntries(new FormData(form).entries());
   try{
-    const response=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    const result=await response.json();
-    if(!response.ok)throw new Error(result.error||'Не удалось отправить заявку');
-    form.reset();statusBox.textContent='Спасибо! Заявка отправлена. Я скоро свяжусь с вами.';
-  }catch(err){statusBox.textContent='Пока не удалось отправить заявку. Попробуйте позже или свяжитесь со мной напрямую.';}
+    // text/plain avoids a browser CORS preflight; Apps Script receives the JSON body in doPost(e).
+    await fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(data)
+    });
+    form.reset();
+    statusBox.textContent='Заявка отправлена. Проверьте Telegram; если сообщение не пришло, попробуйте связаться со мной напрямую.';
+  }catch(err){
+    statusBox.textContent='Не удалось отправить заявку. Попробуйте позже или свяжитесь со мной напрямую.';
+  }
 });
 </script>
 </body></html>
